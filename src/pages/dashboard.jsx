@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAllTeachers } from "../store/slices/teacherSlice";
 import { fetchNewFiles } from "../store/slices/fileSlice";
 import { FiUsers, FiFileText, FiCheck, FiX, FiClock } from "react-icons/fi";
+import { getAllFiles } from "../services/fileService";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,25 @@ const Dashboard = () => {
     (state) => state.files
   );
 
+  const [achievements, setAchievements] = useState([]);
+
+  useEffect(() => {
+    const fetchApprovedFiles = async () => {
+      try {
+        const allFiles = await getAllFiles();
+        // Filter only approved files
+
+        setAchievements(allFiles);
+      } catch (error) {
+        console.error("Fayllarni yuklashda xatolik:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApprovedFiles();
+  }, []);
+
   useEffect(() => {
     dispatch(fetchAllTeachers());
     dispatch(fetchNewFiles());
@@ -25,9 +45,9 @@ const Dashboard = () => {
   const pendingFiles =
     newFiles?.filter((file) => file.status === "Tekshirilmoqda") || [];
   const approvedFiles =
-    newFiles?.filter((file) => file.status === "Tasdiqlandi") || [];
+    achievements?.filter((file) => file.status === "Tasdiqlandi") || [];
   const rejectedFiles =
-    newFiles?.filter((file) => file.status === "Rad etildi") || [];
+    achievements?.filter((file) => file.status === "Tasdiqlanmadi") || [];
 
   return (
     <div className="space-y-6">
