@@ -60,17 +60,7 @@ const TeacherDetail = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate(-1)}
-            className="mr-4 text-blue-500 hover:text-blue-700"
-          >
-            ← Orqaga
-          </button>
-          <h1 className="text-2xl font-bold">O'qituvchi ma'lumotlari</h1>
-        </div>
-      </div>
+      <div className="flex items-center justify-between"></div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-6">

@@ -10,6 +10,7 @@ const AdminLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { admin, loading } = useSelector((state) => state.auth);
+  const pathname = window.location.pathname;
 
   useEffect(() => {
     // Admin profilini olish
@@ -30,6 +31,20 @@ const AdminLayout = () => {
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto p-4">
+          {pathname !== "/" ? (
+            <div className="mb-3">
+              <div className="flex items-center">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="mr-4 text-blue-500 hover:text-blue-700"
+                >
+                  ← Orqaga
+                </button>
+              </div>
+            </div>
+          ) : (
+            ""
+          )}
           <Outlet />
         </main>
       </div>
