@@ -168,12 +168,6 @@ const Dashboard = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b flex justify-between items-center">
           <h2 className="font-semibold text-lg">So'nggi yutuqlar</h2>
-          <Link
-            to="/files"
-            className="text-blue-500 hover:text-blue-700 text-sm font-medium"
-          >
-            Barchasini ko'rish →
-          </Link>
         </div>
 
         {filesLoading ? (
