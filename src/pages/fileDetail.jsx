@@ -10,6 +10,15 @@ import {
   clearCurrentFile,
 } from "../store/slices/fileSlice";
 import { toast } from "react-hot-toast";
+import {
+  FiFileText,
+  FiImage,
+  FiVideo,
+  FiMusic,
+  FiDownload,
+  FiX,
+  FiCheck,
+} from "react-icons/fi";
 
 const FileDetail = () => {
   const { fileId } = useParams();
@@ -87,81 +96,108 @@ const FileDetail = () => {
       });
   };
 
+  const getFileType = (fileName) => {
+    const extension = fileName?.split(".").pop()?.toLowerCase() || "";
+
+    const imageTypes = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
+    const videoTypes = ["mp4", "webm", "ogg", "mov", "avi"];
+    const audioTypes = ["mp3", "wav", "ogg", "m4a"];
+    const documentTypes = ["doc", "docx", "xls", "xlsx", "ppt", "pptx"];
+    const archiveTypes = ["zip", "rar", "7z"];
+    const pdf = ["pdf"];
+
+    if (imageTypes.includes(extension)) return "image";
+    if (videoTypes.includes(extension)) return "video";
+    if (audioTypes.includes(extension)) return "audio";
+    if (documentTypes.includes(extension)) return "document";
+    if (archiveTypes.includes(extension)) return "archive";
+    if (pdf.includes(extension)) return "pdf";
+    return "unknown";
+  };
+
   const renderFilePreview = () => {
-    if (!filePreview || !currentFile) return null;
+    if (!currentFile) return null;
 
     const fileUrl = `https://server.portfolio-sport.uz${currentFile.fileUrl}`;
-    const fileType = filePreview.type || "";
+    const fileType = getFileType(currentFile.fileName);
+    console.log(fileType);
 
-    // Extract file extension from filename
-    const fileExtension =
-      currentFile.fileName?.split(".").pop()?.toLowerCase() || "";
+    switch (fileType) {
+      case "image":
+        return (
+          <div className="flex justify-center bg-gray-50 p-4 rounded-lg">
+            <img
+              src={fileUrl}
+              alt="Yuborilgan rasm"
+              className="max-w-full max-h-[500px] object-contain rounded-md shadow-sm"
+              onError={(e) => {
+                e.target.src = "/placeholder-image.svg";
+              }}
+            />
+          </div>
+        );
 
-    // Rasmlar uchun
-    if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
-      return (
-        <div className="flex justify-center">
-          <img
-            src={fileUrl || "/placeholder.svg"}
-            alt="Fayl ko'rinishi"
-            className="max-w-full max-h-[500px] object-contain"
-          />
-        </div>
-      );
+      case "pdf":
+        return (
+          <div className="h-[600px] bg-gray-50 rounded-lg overflow-hidden">
+            <iframe
+              src={fileUrl}
+              className="w-full h-full border-0"
+              title="PDF ko'rish"
+            ></iframe>
+          </div>
+        );
+
+      case "video":
+        return (
+          <div className="flex justify-center bg-gray-50 p-4 rounded-lg">
+            <video
+              controls
+              className="max-w-full max-h-[500px] rounded-md shadow-sm"
+            >
+              <source
+                src={fileUrl}
+                type={`video/${currentFile.fileName.split(".").pop()}`}
+              />
+              Sizning brauzeringiz video elementini qo'llab-quvvatlamaydi.
+            </video>
+          </div>
+        );
+
+      case "audio":
+        return (
+          <div className="flex justify-center bg-gray-50 p-4 rounded-lg">
+            <audio controls className="w-full">
+              <source
+                src={fileUrl}
+                type={`audio/${currentFile.fileName.split(".").pop()}`}
+              />
+              Sizning brauzeringiz audio elementini qo'llab-quvvatlamaydi.
+            </audio>
+          </div>
+        );
+
+      case "document":
+      case "archive":
+      case "unknown":
+      default:
+        return (
+          <div className="text-center p-6 bg-gray-50 rounded-lg">
+            <FiFileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-lg mb-4 text-gray-700">
+              Ushbu turdagi faylni brauzerda ko'rish mumkin emas
+            </p>
+            <a
+              href={fileUrl}
+              download
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <FiDownload className="mr-2" />
+              Yuklab olish
+            </a>
+          </div>
+        );
     }
-
-    // PDF uchun
-    if (fileExtension === "pdf") {
-      return (
-        <div className="h-[600px]">
-          <iframe
-            src={fileUrl}
-            className="w-full h-full"
-            title="PDF Viewer"
-          ></iframe>
-        </div>
-      );
-    }
-
-    // Video uchun
-    if (["mp4", "webm", "ogg"].includes(fileExtension)) {
-      return (
-        <div className="flex justify-center">
-          <video controls className="max-w-full max-h-[500px]">
-            <source src={fileUrl} type={`video/${fileExtension}`} />
-            Brauzeringiz video elementini qo'llab-quvvatlamaydi.
-          </video>
-        </div>
-      );
-    }
-
-    // Audio uchun
-    if (["mp3", "wav", "ogg"].includes(fileExtension)) {
-      return (
-        <div className="flex justify-center">
-          <audio controls>
-            <source src={fileUrl} type={`audio/${fileExtension}`} />
-            Brauzeringiz audio elementini qo'llab-quvvatlamaydi.
-          </audio>
-        </div>
-      );
-    }
-
-    // Boshqa turdagi fayllar uchun
-    return (
-      <div className="text-center p-6 bg-gray-100 rounded-lg">
-        <p className="text-lg mb-4">
-          Bu turdagi faylni brauzerda ko'rib bo'lmaydi.
-        </p>
-        <a
-          href={fileUrl}
-          download
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Faylni yuklab olish
-        </a>
-      </div>
-    );
   };
 
   if (loading && !currentFile) {
@@ -311,14 +347,16 @@ const FileDetail = () => {
                   <div className="flex space-x-3">
                     <button
                       onClick={handleApprove}
-                      className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      className="inline-flex items-center justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     >
+                      <FiCheck className="mr-2" />
                       Tasdiqlash
                     </button>
                     <button
                       onClick={handleReject}
-                      className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      className="inline-flex items-center justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
+                      <FiX className="mr-2" />
                       Rad etish
                     </button>
                   </div>
