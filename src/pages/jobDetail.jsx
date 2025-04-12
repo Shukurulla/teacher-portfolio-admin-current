@@ -55,18 +55,6 @@ const JobDetail = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate(`/teachers/${teacherId}`)}
-            className="mr-4 text-blue-500 hover:text-blue-700"
-          >
-            ← Orqaga
-          </button>
-          <h1 className="text-2xl font-bold">Ish joyi ma'lumotlari</h1>
-        </div>
-      </div>
-
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-6">
           <h2 className="text-xl font-semibold">{currentJob.title}</h2>

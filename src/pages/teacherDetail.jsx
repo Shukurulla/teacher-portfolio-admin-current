@@ -8,6 +8,13 @@ import {
   fetchTeacherJobs,
   clearCurrentTeacher,
 } from "../store/slices/teacherSlice";
+import {
+  FiBriefcase,
+  FiAward,
+  FiUser,
+  FiCalendar,
+  FiPhone,
+} from "react-icons/fi";
 
 const TeacherDetail = () => {
   const { id } = useParams();
@@ -62,6 +69,7 @@ const TeacherDetail = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between"></div>
 
+      {/* Teacher Profile Section */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-6">
           <div className="flex flex-col md:flex-row">
@@ -77,14 +85,19 @@ const TeacherDetail = () => {
             </div>
             <div className="md:w-3/4 md:pl-6">
               <h2 className="text-xl font-semibold">
+                <FiUser className="inline mr-2 text-blue-500" />
                 {currentTeacher.firstName} {currentTeacher.lastName}
               </h2>
               <p className="text-gray-600 mt-2">
+                <FiPhone className="inline mr-2 text-blue-500" />
                 <span className="font-medium">Telefon:</span>{" "}
                 {currentTeacher.phone}
               </p>
               <p className="text-gray-600 mt-2">
-                <span className="font-medium">Ro'yxatdan o'tgan sana:</span>{" "}
+                <FiCalendar className="inline mr-2 text-blue-500" />
+                <span className="font-medium">
+                  Ro'yxatdan o'tgan sana:
+                </span>{" "}
                 {new Date(currentTeacher.createdAt).toLocaleDateString("uz-UZ")}
               </p>
             </div>
@@ -92,9 +105,13 @@ const TeacherDetail = () => {
         </div>
       </div>
 
+      {/* Jobs Section */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b">
-          <h2 className="font-semibold text-lg">Ish joylari</h2>
+          <h2 className="font-semibold text-lg flex items-center">
+            <FiBriefcase className="mr-2 text-blue-500" />
+            Ish joylari
+          </h2>
         </div>
 
         {loading ? (
@@ -115,11 +132,36 @@ const TeacherDetail = () => {
                 className="block bg-white border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{job.title}</h3>
-                  <p className="text-gray-600">{job.workplace}</p>
-                  <p className="text-gray-500 text-sm mt-2">
-                    {new Date(job.createdAt).toLocaleDateString("uz-UZ")}
-                  </p>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold text-lg mb-2 flex items-center">
+                        <FiBriefcase className="mr-2 text-blue-500" />
+                        {job.title}
+                      </h3>
+                      <p className="text-gray-600">{job.workplace}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <FiCalendar className="mr-1" />
+                      {new Date(job.createdAt).toLocaleDateString("uz-UZ")}
+                    </div>
+
+                    <div className="flex space-x-4">
+                      <div className="flex items-center text-sm bg-blue-50 px-2 py-1 rounded">
+                        <FiAward className="mr-1 text-blue-500" />
+                        <span className="font-medium">
+                          {job.achievementsCount || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-sm bg-green-50 px-2 py-1 rounded">
+                        <span className="font-medium text-green-600">
+                          {job.totalScore || 0} ball
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Link>
             ))}
