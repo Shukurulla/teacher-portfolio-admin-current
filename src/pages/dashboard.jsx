@@ -28,8 +28,6 @@ const Dashboard = () => {
         setAchievements(allFiles);
       } catch (error) {
         console.error("Fayllarni yuklashda xatolik:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -232,7 +230,9 @@ const Dashboard = () => {
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {file.status}
+                        {file.status == "Tekshirilmoqda"
+                          ? "Jarayonda"
+                          : file.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

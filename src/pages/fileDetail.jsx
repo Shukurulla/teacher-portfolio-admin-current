@@ -16,8 +16,10 @@ import {
   FiVideo,
   FiMusic,
   FiDownload,
-  FiX,
   FiCheck,
+  FiX,
+  FiUser,
+  FiCalendar,
 } from "react-icons/fi";
 
 const FileDetail = () => {
@@ -30,10 +32,12 @@ const FileDetail = () => {
     loading,
     error,
   } = useSelector((state) => state.files);
+  const user = JSON.parse(localStorage.getItem("admin"));
 
+  const [ratings, setRatings] = useState([]);
   const [resultMessage, setResultMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Access the nested data property
   const currentFile = fileData?.data || null;
 
   useEffect(() => {
@@ -48,52 +52,88 @@ const FileDetail = () => {
   useEffect(() => {
     if (currentFile) {
       setResultMessage(currentFile.resultMessage || "");
+      const initialRatings =
+        currentFile.files?.map((file) => file.rating || null) || [];
+      setRatings(initialRatings);
     }
   }, [currentFile]);
 
-  const handleApprove = () => {
-    dispatch(
-      updateFile({
-        id: fileId,
-        data: {
-          status: "Tasdiqlandi",
-          resultMessage,
-        },
-      })
-    )
-      .unwrap()
-      .then(() => {
-        toast.success("Fayl muvaffaqiyatli tasdiqlandi");
-        window.location.reload();
-      })
-      .catch((error) => {
-        toast.error(error || "Faylni tasdiqlashda xatolik yuz berdi");
-      });
+  const handleRatingChange = (fileIndex, value) => {
+    const newRatings = [...ratings];
+    newRatings[fileIndex] = value ? Number(value) : null;
+    setRatings(newRatings);
   };
 
-  const handleReject = () => {
+  const handleApprove = async () => {
+    if (ratings.some((rating) => rating === null)) {
+      toast.error("Iltimos, barcha fayllar uchun baho belgilang");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const updatedFiles = currentFile.files.map((file, index) => ({
+        ...file,
+        rating: ratings[index],
+      }));
+
+      await dispatch(
+        updateFile({
+          id: fileId,
+          data: {
+            status: "Tasdiqlandi",
+            resultMessage,
+            files: updatedFiles,
+            inspector: {
+              id: user._id,
+              name: `${user.firstName} ${user.lastName}`,
+              role: user.role,
+              date: new Date(),
+            },
+          },
+        })
+      ).unwrap();
+
+      toast.success("Fayl muvaffaqiyatli tasdiqlandi");
+      navigate("/admin/files");
+    } catch (error) {
+      toast.error(error.message || "Faylni tasdiqlashda xatolik yuz berdi");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReject = async () => {
     if (!resultMessage.trim()) {
       toast.error("Iltimos, rad etish sababini kiriting");
       return;
     }
 
-    dispatch(
-      updateFile({
-        id: fileId,
-        data: {
-          status: "Tasdiqlanmadi",
-          resultMessage,
-        },
-      })
-    )
-      .unwrap()
-      .then(() => {
-        toast.success("Fayl rad etildi");
-        window.location.reload();
-      })
-      .catch((error) => {
-        toast.error(error || "Faylni rad etishda xatolik yuz berdi");
-      });
+    setIsSubmitting(true);
+    try {
+      await dispatch(
+        updateFile({
+          id: fileId,
+          data: {
+            status: "Tasdiqlanmadi",
+            resultMessage,
+            inspector: {
+              id: user._id,
+              name: `${user.firstName} ${user.lastName}`,
+              role: user.role,
+              date: new Date(),
+            },
+          },
+        })
+      ).unwrap();
+
+      toast.success("Fayl rad etildi");
+      navigate("/admin/files");
+    } catch (error) {
+      toast.error(error.message || "Faylni rad etishda xatolik yuz berdi");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getFileType = (fileName) => {
@@ -115,12 +155,11 @@ const FileDetail = () => {
     return "unknown";
   };
 
-  const renderFilePreview = () => {
-    if (!currentFile) return null;
+  const renderFilePreview = (file) => {
+    if (!file) return null;
 
-    const fileUrl = `https://server.portfolio-sport.uz${currentFile.fileUrl}`;
-    const fileType = getFileType(currentFile.fileName);
-    console.log(fileType);
+    const fileUrl = `http://localhost:7474${file.fileUrl}`;
+    const fileType = getFileType(file.fileUrl);
 
     switch (fileType) {
       case "image":
@@ -157,7 +196,7 @@ const FileDetail = () => {
             >
               <source
                 src={fileUrl}
-                type={`video/${currentFile.fileName.split(".").pop()}`}
+                type={`video/${file.fileName?.split(".").pop()}`}
               />
               Sizning brauzeringiz video elementini qo'llab-quvvatlamaydi.
             </video>
@@ -170,7 +209,7 @@ const FileDetail = () => {
             <audio controls className="w-full">
               <source
                 src={fileUrl}
-                type={`audio/${currentFile.fileName.split(".").pop()}`}
+                type={`audio/${file.fileName?.split(".").pop()}`}
               />
               Sizning brauzeringiz audio elementini qo'llab-quvvatlamaydi.
             </audio>
@@ -233,29 +272,66 @@ const FileDetail = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Fayl Ko'rinishi Bo'limi */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b">
-              <h2 className="font-semibold text-lg">Fayl ko'rinishi</h2>
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Yuklangan Fayllar
+              </h2>
             </div>
-            <div className="p-6">
-              {loading ? (
-                <div className="flex items-center justify-center min-h-[300px]">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="p-6 space-y-6">
+              {currentFile.files?.map((file, index) => (
+                <div
+                  key={file._id}
+                  className="border rounded-lg overflow-hidden"
+                >
+                  <div className="p-4 bg-gray-50">
+                    {renderFilePreview(file)}
+                  </div>
+                  <div className="p-4 border-t">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium text-gray-800">
+                        {file.fileTitle}
+                      </h3>
+                      <div className="w-48">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Baho:
+                        </label>
+                        <select
+                          value={ratings[index] || ""}
+                          onChange={(e) =>
+                            handleRatingChange(index, e.target.value)
+                          }
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          disabled={currentFile.status !== "Tekshirilmoqda"}
+                        >
+                          <option value="">Baho tanlang</option>
+                          {currentFile.achievments.ratings.map((item) => (
+                            <option key={item._id} value={item.rating}>
+                              {item.about} ({item.rating} ball)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                renderFilePreview()
-              )}
+              ))}
             </div>
           </div>
         </div>
 
+        {/* Ma'lumotlar va Amallar Bo'limi */}
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b">
-              <h2 className="font-semibold text-lg">Fayl haqida</h2>
+          {/* Fayl Ma'lumotlari */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Fayl ma'lumotlari
+              </h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
@@ -283,17 +359,10 @@ const FileDetail = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Ball</h3>
-                  <p className="mt-1 text-sm text-gray-900">
-                    {currentFile.achievments?.rating?.rating}
-                  </p>
-                </div>
-
-                <div>
                   <h3 className="text-sm font-medium text-gray-500">Holat</h3>
                   <p className="mt-1">
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         currentFile.status === "Tasdiqlandi"
                           ? "bg-green-100 text-green-800"
                           : currentFile.status === "Tasdiqlanmadi"
@@ -312,7 +381,14 @@ const FileDetail = () => {
                   </h3>
                   <p className="mt-1 text-sm text-gray-900">
                     {new Date(currentFile.createdAt).toLocaleDateString(
-                      "uz-UZ"
+                      "uz-UZ",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
                     )}
                   </p>
                 </div>
@@ -320,41 +396,40 @@ const FileDetail = () => {
             </div>
           </div>
 
+          {/* Tasdiqlash/Radd Qilish Bo'limi */}
           {currentFile.status === "Tekshirilmoqda" && (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="px-6 py-4 border-b">
-                <h2 className="font-semibold text-lg">Baholash</h2>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-800">Amallar</h2>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
                   <div>
-                    <label
-                      htmlFor="resultMessage"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Natija xabari
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Sharh:
                     </label>
                     <textarea
-                      id="resultMessage"
-                      rows={4}
-                      className="mt-1 outline-none block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Natija haqida xabar yozing..."
+                      rows={3}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      placeholder="Fayl haqida sharh yozing..."
                       value={resultMessage}
                       onChange={(e) => setResultMessage(e.target.value)}
-                    ></textarea>
+                    />
                   </div>
-
                   <div className="flex space-x-3">
                     <button
                       onClick={handleApprove}
-                      className="inline-flex items-center justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      disabled={true}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
                     >
                       <FiCheck className="mr-2" />
                       Tasdiqlash
                     </button>
                     <button
                       onClick={handleReject}
-                      className="inline-flex items-center justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      // disabled={isSubmitting || !resultMessage.trim()}
+                      disabled={true}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
                     >
                       <FiX className="mr-2" />
                       Rad etish
@@ -365,14 +440,66 @@ const FileDetail = () => {
             </div>
           )}
 
+          {/* Tekshiruvchi Ma'lumotlari */}
+          {currentFile.inspector && (
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Tekshiruvchi
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <FiUser className="h-5 w-5 text-gray-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">
+                        Ismi
+                      </h3>
+                      <p className="text-sm text-gray-900">
+                        {currentFile.inspector.name}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <FiCalendar className="h-5 w-5 text-gray-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">
+                        Tekshirilgan sana
+                      </h3>
+                      <p className="text-sm text-gray-900">
+                        {new Date(
+                          currentFile.inspector.date
+                        ).toLocaleDateString("uz-UZ", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Natija Xabari */}
           {currentFile.status !== "Tekshirilmoqda" &&
             currentFile.resultMessage && (
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="px-6 py-4 border-b">
-                  <h2 className="font-semibold text-lg">Natija xabari</h2>
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    Natija xabari
+                  </h2>
                 </div>
                 <div className="p-6">
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-900 whitespace-pre-line">
                     {currentFile.resultMessage}
                   </p>
                 </div>
