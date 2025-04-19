@@ -87,7 +87,7 @@ const Dashboard = () => {
               <FiClock className="h-6 w-6" />
             </div>
             <div className="ml-4">
-              <h2 className="text-gray-600">Yangi yutuqlar</h2>
+              <h2 className="text-gray-600">Jarayonda</h2>
               <p className="text-2xl font-semibold">
                 {filesLoading ? (
                   <span className="text-sm text-gray-500">Yuklanmoqda...</span>
