@@ -9,6 +9,7 @@ import { getAllFiles } from "../services/fileService";
 const RejectedFilesPage = () => {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
+  console.log(achievements);
 
   useEffect(() => {
     const fetchRejectedFiles = async () => {
@@ -17,7 +18,7 @@ const RejectedFilesPage = () => {
         const allFiles = await getAllFiles();
         // Filter only rejected files
         const rejectedFiles = allFiles.filter(
-          (file) => file.status === "Rad etildi"
+          (file) => file.status === "Tasdiqlanmadi"
         );
         setAchievements(rejectedFiles);
       } catch (error) {
@@ -40,7 +41,7 @@ const RejectedFilesPage = () => {
         textColor = "text-green-800";
         icon = <FiCheck className="mr-1" />;
         break;
-      case "Rad etildi":
+      case "Tasdiqlanmadi":
         bgColor = "bg-red-100";
         textColor = "text-red-800";
         icon = <FiX className="mr-1" />;
@@ -139,10 +140,6 @@ const RejectedFilesPage = () => {
                     <div className="col-span-4">
                       <p className="font-medium text-gray-900">
                         {achievement.achievments.title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {achievement.achievments.rating.ratingTitle} (
-                        {achievement.achievments.rating.rating}/5)
                       </p>
                     </div>
 

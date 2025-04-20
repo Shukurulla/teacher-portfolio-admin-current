@@ -19,6 +19,8 @@ const ApprovedFilesPage = () => {
         const approvedFiles = allFiles.filter(
           (file) => file.status === "Tasdiqlandi"
         );
+        console.log(approvedFiles);
+
         setAchievements(approvedFiles);
       } catch (error) {
         console.error("Fayllarni yuklashda xatolik:", error);
@@ -141,8 +143,8 @@ const ApprovedFilesPage = () => {
                         {achievement.achievments.title}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {achievement.achievments.rating.ratingTitle} (
-                        {achievement.achievments.rating.rating}/5)
+                        {achievement.achievments.rating?.ratingTitle} (
+                        {achievement.achievments.rating?.rating}/5)
                       </p>
                     </div>
 

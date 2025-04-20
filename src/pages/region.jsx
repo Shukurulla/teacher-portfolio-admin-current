@@ -3,36 +3,26 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { fetchAllTeachers, removeTeacher } from "../store/slices/teacherSlice";
-import { toast } from "react-hot-toast";
-
-const TeacherList = () => {
+import api from "../api/api";
+import { useParams } from "react-router-dom";
+const RegionTeachers = () => {
   const dispatch = useDispatch();
+  const { regionName } = useParams();
   const { teachers, loading, error } = useSelector((state) => state.teachers);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [regionTeachers, setRegionTeachers] = useState([]);
   useEffect(() => {
-    dispatch(fetchAllTeachers());
-  }, [dispatch]);
-  console.log(teachers);
+    const getProvinces = async () => {
+      const { data } = await api.get("/teacher/sorted-regions");
 
-  const handleDelete = (id) => {
-    if (window.confirm("Haqiqatan ham bu o'qituvchini o'chirmoqchimisiz?")) {
-      dispatch(removeTeacher(id))
-        .unwrap()
-        .then(() => {
-          toast.success("O'qituvchi muvaffaqiyatli o'chirildi");
-        })
-        .catch((error) => {
-          toast.error(error || "O'qituvchini o'chirishda xatolik yuz berdi");
-        });
-    }
-  };
-
-  const filteredTeachers = teachers?.filter((teacher) => {
-    const fullName = `${teacher.firstName} ${teacher.lastName}`.toLowerCase();
-    return fullName.includes(searchTerm.toLowerCase());
-  });
+      setRegionTeachers(data);
+    };
+    getProvinces();
+  }, []);
+  const filteredTeachers = regionTeachers?.filter(
+    (teacher) => teacher.region == regionName
+  )[0]?.teachers;
+  console.log(filteredTeachers);
 
   return (
     <div className="space-y-6">
@@ -186,4 +176,4 @@ const TeacherList = () => {
   );
 };
 
-export default TeacherList;
+export default RegionTeachers;

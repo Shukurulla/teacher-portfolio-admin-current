@@ -20,6 +20,7 @@ import {
   FiX,
   FiUser,
   FiCalendar,
+  FiRefreshCcw,
 } from "react-icons/fi";
 
 const FileDetail = () => {
@@ -61,6 +62,8 @@ const FileDetail = () => {
   const handleRatingChange = (fileIndex, value) => {
     const newRatings = [...ratings];
     newRatings[fileIndex] = value ? Number(value) : null;
+    console.log(newRatings);
+
     setRatings(newRatings);
   };
 
@@ -84,18 +87,13 @@ const FileDetail = () => {
             status: "Tasdiqlandi",
             resultMessage,
             files: updatedFiles,
-            inspector: {
-              id: user._id,
-              name: `${user.firstName} ${user.lastName}`,
-              role: user.role,
-              date: new Date(),
-            },
+            inspector: user._id,
           },
         })
       ).unwrap();
 
       toast.success("Fayl muvaffaqiyatli tasdiqlandi");
-      navigate("/admin/files");
+      navigate("/");
     } catch (error) {
       toast.error(error.message || "Faylni tasdiqlashda xatolik yuz berdi");
     } finally {
@@ -117,18 +115,13 @@ const FileDetail = () => {
           data: {
             status: "Tasdiqlanmadi",
             resultMessage,
-            inspector: {
-              id: user._id,
-              name: `${user.firstName} ${user.lastName}`,
-              role: user.role,
-              date: new Date(),
-            },
+            inspector: user._id,
           },
         })
       ).unwrap();
 
       toast.success("Fayl rad etildi");
-      navigate("/admin/files");
+      navigate("/");
     } catch (error) {
       toast.error(error.message || "Faylni rad etishda xatolik yuz berdi");
     } finally {
@@ -158,7 +151,7 @@ const FileDetail = () => {
   const renderFilePreview = (file) => {
     if (!file) return null;
 
-    const fileUrl = `https://server.portfolio-sport.uz${file.fileUrl}`;
+    const fileUrl = `http://localhost:7474${file.fileUrl}`;
     const fileType = getFileType(file.fileUrl);
 
     switch (fileType) {
@@ -301,16 +294,20 @@ const FileDetail = () => {
                           Baho:
                         </label>
                         <select
-                          value={ratings[index] || ""}
+                          value={ratings[index] === null ? "" : ratings[index]}
                           onChange={(e) =>
                             handleRatingChange(index, e.target.value)
                           }
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full outline-none cursor-pointer rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                           disabled={currentFile.status !== "Tekshirilmoqda"}
                         >
                           <option value="">Baho tanlang</option>
                           {currentFile.achievments.ratings.map((item) => (
-                            <option key={item._id} value={item.rating}>
+                            <option
+                              disabled={ratings.find((c) => c == item.rating)}
+                              key={item._id}
+                              value={item.rating}
+                            >
                               {item.about} ({item.rating} ball)
                             </option>
                           ))}
@@ -320,6 +317,14 @@ const FileDetail = () => {
                   </div>
                 </div>
               ))}
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="btn btn-primary flex gap-2 items-center"
+                >
+                  <FiRefreshCcw /> <span>Boshidan boshlash</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -384,7 +389,7 @@ const FileDetail = () => {
                       "uz-UZ",
                       {
                         year: "numeric",
-                        month: "long",
+                        month: "numeric",
                         day: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
@@ -416,25 +421,27 @@ const FileDetail = () => {
                       onChange={(e) => setResultMessage(e.target.value)}
                     />
                   </div>
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={handleApprove}
-                      disabled={true}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                    >
-                      <FiCheck className="mr-2" />
-                      Tasdiqlash
-                    </button>
-                    <button
-                      onClick={handleReject}
-                      // disabled={isSubmitting || !resultMessage.trim()}
-                      disabled={true}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-                    >
-                      <FiX className="mr-2" />
-                      Rad etish
-                    </button>
-                  </div>
+                  {user.region.region == currentFile?.from?.region.region ? (
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={handleApprove}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                      >
+                        <FiCheck className="mr-2" />
+                        Tasdiqlash
+                      </button>
+                      <button
+                        onClick={handleReject}
+                        disabled={isSubmitting || !resultMessage.trim()}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                      >
+                        <FiX className="mr-2" />
+                        Rad etish
+                      </button>
+                    </div>
+                  ) : (
+                    <div>Siz ushbu yutuqni tekshira olmaysiz</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -459,7 +466,7 @@ const FileDetail = () => {
                         Ismi
                       </h3>
                       <p className="text-sm text-gray-900">
-                        {currentFile.inspector.name}
+                        {currentFile.inspector.username}
                       </p>
                     </div>
                   </div>
@@ -472,15 +479,16 @@ const FileDetail = () => {
                         Tekshirilgan sana
                       </h3>
                       <p className="text-sm text-gray-900">
-                        {new Date(
-                          currentFile.inspector.date
-                        ).toLocaleDateString("uz-UZ", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(currentFile.updatedAt).toLocaleDateString(
+                          "uz-UZ",
+                          {
+                            year: "numeric",
+                            month: "numeric",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </p>
                     </div>
                   </div>

@@ -5,19 +5,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { login, clearError } from "../store/slices/authSlice";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
-const Login = () => {
+const RegisterPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const [provinces, setProvinces] = useState([]);
+  const [province, setProvince] = useState({
+    title: "Toshkent shahri",
+    region: "Toshkent",
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const { isAuthenticated, loading, error } = useSelector(
     (state) => state.auth
   );
 
   // Redirect if already authenticated
+  useEffect(() => {
+    const getProvinces = async () => {
+      const { data } = await axios.get(
+        "https://server.portfolio-sport.uz/teacher/regions"
+      );
+      console.log(data.data);
+
+      setProvinces(data.data);
+    };
+    getProvinces();
+  }, []);
   useEffect(() => {
     if (isAuthenticated) {
       const from = location.state?.from?.pathname || "/";
@@ -30,9 +49,28 @@ const Login = () => {
     };
   }, [isAuthenticated, navigate, location, dispatch]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(login({ username, password }));
+    setIsLoading(true);
+
+    try {
+      const { data } = await axios.post("http://localhost:7474/admin/sign", {
+        username,
+        password,
+        region: province,
+      });
+      if (data.data) {
+        toast.success(
+          "Malumotlar muaffaqiyatili qoshildi! profilingizga kiring"
+        );
+      }
+      navigate("/login");
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,7 +78,7 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Admin panelga kirish
+            Ro'yhatdan o'tish
           </h2>
         </div>
 
@@ -76,25 +114,38 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            <div className="mt-2">
+              <select
+                value={JSON.stringify(province)}
+                onChange={(e) => setProvince(JSON.parse(e.target.value))}
+                className="form-control appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              >
+                {provinces.map((item, index) => (
+                  <option key={index} value={JSON.stringify(item)}>
+                    {item.title}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {error && (
             <div className="text-red-500 text-sm text-center">{error}</div>
           )}
           <p>
-            Sizda hisob yo'qmi?{" "}
-            <Link to={"/register"} className="text-blue-600">
-              Ro'yhatdan o'tish
+            Sizda hisob bormi?{" "}
+            <Link to={"/login"} className="text-blue-600">
+              Kirish
             </Link>{" "}
           </p>
 
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? (
+              {isLoading ? (
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                   <svg
                     className="animate-spin h-5 w-5 text-white"
@@ -143,4 +194,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default RegisterPage;

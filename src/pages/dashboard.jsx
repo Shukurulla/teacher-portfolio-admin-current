@@ -6,7 +6,9 @@ import { Link } from "react-router-dom";
 import { fetchAllTeachers } from "../store/slices/teacherSlice";
 import { fetchNewFiles } from "../store/slices/fileSlice";
 import { FiUsers, FiFileText, FiCheck, FiX, FiClock } from "react-icons/fi";
+import { MdAccountBalance } from "react-icons/md";
 import { getAllFiles } from "../services/fileService";
+import api from "../api/api";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -16,10 +18,16 @@ const Dashboard = () => {
   const { newFiles, loading: filesLoading } = useSelector(
     (state) => state.files
   );
-
+  const [regionTeachers, setRegionTeachers] = useState([]);
   const [achievements, setAchievements] = useState([]);
 
   useEffect(() => {
+    const getProvinces = async () => {
+      const { data } = await api.get("/teacher/sorted-regions");
+
+      setRegionTeachers(data);
+    };
+    getProvinces();
     const fetchApprovedFiles = async () => {
       try {
         const allFiles = await getAllFiles();
@@ -160,6 +168,39 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
+      </div>
+      <h1 className="text-2xl font-bold">Hududlarda tinglovchilar </h1>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {regionTeachers.length &&
+          regionTeachers?.map((item) => (
+            <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-blue-100 text-blue-500">
+                  <MdAccountBalance className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <h2 className="text-gray-600">{item.region}</h2>
+                  <p className="text-2xl font-semibold">
+                    {teachersLoading ? (
+                      <span className="text-sm text-gray-500">
+                        Yuklanmoqda...
+                      </span>
+                    ) : (
+                      item.teachers?.length || 0
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <Link
+                  to={`/region/${item.region}`}
+                  className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                >
+                  Barchasini ko'rish →
+                </Link>
+              </div>
+            </div>
+          ))}
       </div>
 
       {/* Recent Files Table */}

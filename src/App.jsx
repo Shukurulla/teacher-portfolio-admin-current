@@ -18,6 +18,8 @@ import {
   TeacterDetail,
 } from "./pages";
 import { ProtectedRoute } from "./components";
+import RegisterPage from "./pages/register";
+import RegionTeachers from "./pages/region";
 
 // Pages
 
@@ -28,6 +30,7 @@ function App() {
         <Toaster position="top-right" />
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<RegisterPage />} />
 
           <Route
             path="/"
@@ -45,6 +48,7 @@ function App() {
               element={<JobDetail />}
             />
             <Route path="files/:fileId" element={<FileDetail />} />
+            <Route path="region/:regionName" element={<RegionTeachers />} />
             <Route path="/new-files" element={<NewAchievementsPage />} />
             <Route path="/approved" element={<ApprovedFilesPage />} />
             <Route path="/rejected" element={<RejectedFilesPage />} />
