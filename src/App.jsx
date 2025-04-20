@@ -20,6 +20,7 @@ import {
 import { ProtectedRoute } from "./components";
 import RegisterPage from "./pages/register";
 import RegionTeachers from "./pages/region";
+import SelectRegions from "./pages/selectRegions";
 
 // Pages
 
@@ -31,6 +32,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<RegisterPage />} />
+          {/* <Route path="/select" element={<SelectRegions />} /> */}
+          <Route path="/" element={<Dashboard />} />
 
           <Route
             path="/"
@@ -40,7 +43,6 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Dashboard />} />
             <Route path="teachers" element={<TeacherList />} />
             <Route path="teachers/:id" element={<TeacterDetail />} />
             <Route

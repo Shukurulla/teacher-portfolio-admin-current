@@ -28,7 +28,9 @@ const JobDetail = () => {
       </div>
     );
   }
-  console.log(jobFiles);
+  const ratings = jobFiles
+    .filter((c) => c.status == "Tasdiqlandi")
+    .map((c) => c.files.map((item) => item.rating).reduce((a, b) => b + a, 0));
 
   if (error) {
     return (
@@ -117,6 +119,12 @@ const JobDetail = () => {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
+                    Tekshiruvchi
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Sana
                   </th>
                   <th
@@ -128,7 +136,7 @@ const JobDetail = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {jobFiles?.map((file) => (
+                {jobFiles?.map((file, idx) => (
                   <tr key={file._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
@@ -142,7 +150,7 @@ const JobDetail = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {file.achievments.rating?.rating}
+                        {ratings[idx] || 0}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -157,6 +165,11 @@ const JobDetail = () => {
                       >
                         {file.status}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {file.inspector.username}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(file.createdAt).toLocaleDateString("uz-UZ")}

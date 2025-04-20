@@ -10,6 +10,8 @@ const RegionTeachers = () => {
   const { regionName } = useParams();
   const { teachers, loading, error } = useSelector((state) => state.teachers);
   const [searchTerm, setSearchTerm] = useState("");
+  const { files } = useSelector((state) => state.files);
+
   const [regionTeachers, setRegionTeachers] = useState([]);
   useEffect(() => {
     const getProvinces = async () => {
@@ -22,7 +24,7 @@ const RegionTeachers = () => {
   const filteredTeachers = regionTeachers?.filter(
     (teacher) => teacher.region == regionName
   )[0]?.teachers;
-  console.log(filteredTeachers);
+  console.log(teachers);
 
   return (
     <div className="space-y-6">
@@ -152,18 +154,24 @@ const RegionTeachers = () => {
                       {teacher.region.title}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {teacher.jobsCount || 0}
+                      {teachers.find((c) => c._id == teacher._id).jobs
+                        ?.length || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {teacher.achievementsCount || 0}
+                      {teachers.find((c) => c._id == teacher._id)
+                        .achievementsCount || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Link
-                        to={`/teachers/${teacher._id}`}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        Ko'rish
-                      </Link>
+                      {teacher.region.region == "Nukus" ? (
+                        <Link
+                          to={`/teachers/${teacher._id}`}
+                          className="text-blue-600 hover:text-blue-900 mr-4"
+                        >
+                          Ko'rish
+                        </Link>
+                      ) : (
+                        ""
+                      )}
                     </td>
                   </tr>
                 ))}

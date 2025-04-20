@@ -15,6 +15,7 @@ import {
   FiCalendar,
   FiPhone,
 } from "react-icons/fi";
+import { MdAccountBalance } from "react-icons/md";
 
 const TeacherDetail = () => {
   const { id } = useParams();
@@ -23,6 +24,8 @@ const TeacherDetail = () => {
   const { currentTeacher, teacherJobs, loading, error } = useSelector(
     (state) => state.teachers
   );
+
+  console.log(currentTeacher);
 
   useEffect(() => {
     dispatch(fetchTeacherById(id));
@@ -134,11 +137,14 @@ const TeacherDetail = () => {
                 <div className="p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-semibold text-lg mb-2 flex items-center">
-                        <FiBriefcase className="mr-2 text-blue-500" />
-                        {job.title}
+                      <h3 className="font-semibold  text-lg mb-2 flex items-center">
+                        <FiBriefcase className="mr-2 w-[10%] text-lg text-blue-500" />
+                        <span className="w-[90%] text-md">{job.title}</span>
                       </h3>
-                      <p className="text-gray-600">{job.workplace}</p>
+                      <p className="flex items-center text-gray-600">
+                        <MdAccountBalance />
+                        {job.workplace}
+                      </p>
                     </div>
                   </div>
 
@@ -148,7 +154,7 @@ const TeacherDetail = () => {
                       {new Date(job.createdAt).toLocaleDateString("uz-UZ")}
                     </div>
 
-                    <div className="flex space-x-4">
+                    {/* <div className="flex space-x-4">
                       <div className="flex items-center text-sm bg-blue-50 px-2 py-1 rounded">
                         <FiAward className="mr-1 text-blue-500" />
                         <span className="font-medium">
@@ -160,7 +166,7 @@ const TeacherDetail = () => {
                           {job.totalScore || 0} ball
                         </span>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </Link>

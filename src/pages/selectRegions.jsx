@@ -10,7 +10,7 @@ import { MdAccountBalance } from "react-icons/md";
 import { getAllFiles } from "../services/fileService";
 import api from "../api/api";
 
-const Dashboard = () => {
+const SelectRegions = () => {
   const dispatch = useDispatch();
   const { teachers, loading: teachersLoading } = useSelector(
     (state) => state.teachers
@@ -56,7 +56,7 @@ const Dashboard = () => {
     achievements?.filter((file) => file.status === "Tasdiqlanmadi") || [];
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6">
       {/* <h1 className="text-2xl font-bold">Boshqaruv paneli</h1> */}
 
       {/* Stats Cards */}
@@ -171,41 +171,18 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {regionTeachers.length &&
           regionTeachers?.map((item) => (
-            <div
-              className={`${
-                item.region == "Nukus" ? "bg-green-50" : "bg-white"
-              } rounded-lg shadow p-6 hover:shadow-md transition-shadow`}
-            >
+            <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center">
-                <div className="p-3 rounded-full bg-blue-50 text-blue-500">
-                  <MdAccountBalance
-                    className={`h-6 w-6 ${
-                      item.region == "Nukus"
-                        ? "text-green-500"
-                        : "text-gray-600"
-                    }`}
-                  />
+                <div className="p-3 rounded-full bg-blue-100 text-blue-500">
+                  <MdAccountBalance className="h-6 w-6" />
                 </div>
                 <div className="ml-4">
-                  <h2
-                    className={` ${
-                      item.region == "Nukus"
-                        ? "text-green-500"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {item.region}
-                  </h2>
-
-                  <p
-                    className={`text-2xl  font-semibold ${
-                      item.region == "Nukus"
-                        ? "text-green-500"
-                        : "text-gray-600"
-                    }`}
-                  >
+                  <h2 className="text-gray-600">{item.region}</h2>
+                  <p className="text-2xl font-semibold">
                     {teachersLoading ? (
-                      <span className={`text-sm `}>Yuklanmoqda...</span>
+                      <span className="text-sm text-gray-500">
+                        Yuklanmoqda...
+                      </span>
                     ) : (
                       item.teachers?.length || 0
                     )}
@@ -215,11 +192,7 @@ const Dashboard = () => {
               <div className="mt-4">
                 <Link
                   to={`/region/${item.region}`}
-                  className={` ${
-                    item.region == "Nukus"
-                      ? "text-green-500"
-                      : "text-blue-600 hover:text-blue-700"
-                  }  text-sm font-medium`}
+                  className="text-blue-500 hover:text-blue-700 text-sm font-medium"
                 >
                   Barchasini ko'rish →
                 </Link>
@@ -320,4 +293,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default SelectRegions;
