@@ -151,7 +151,7 @@ const FileDetail = () => {
   const renderFilePreview = (file) => {
     if (!file) return null;
 
-    const fileUrl = `http://localhost:7474${file.fileUrl}`;
+    const fileUrl = `https://server.portfolio-sport.uz${file.fileUrl}`;
     const fileType = getFileType(file.fileUrl);
 
     switch (fileType) {

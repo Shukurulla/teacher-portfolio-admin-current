@@ -54,11 +54,14 @@ const RegisterPage = () => {
     setIsLoading(true);
 
     try {
-      const { data } = await axios.post("http://localhost:7474/admin/sign", {
-        username,
-        password,
-        region: province,
-      });
+      const { data } = await axios.post(
+        "https://server.portfolio-sport.uz/admin/sign",
+        {
+          username,
+          password,
+          region: province,
+        }
+      );
       if (data.data) {
         toast.success(
           "Malumotlar muaffaqiyatili qoshildi! profilingizga kiring"
