@@ -5,14 +5,28 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import api from "../api/api";
 import { useParams } from "react-router-dom";
+import { FiCheck, FiClock, FiUsers, FiX } from "react-icons/fi";
+import { getAllFiles } from "../services/fileService";
+import { fetchAllTeachers } from "../store/slices/teacherSlice";
+import { fetchNewFiles } from "../store/slices/fileSlice";
 const RegionTeachers = () => {
   const dispatch = useDispatch();
   const { regionName } = useParams();
-  const { teachers, loading, error } = useSelector((state) => state.teachers);
+  const {
+    teachers,
+    loading: teachersLoading,
+    error,
+  } = useSelector((state) => state.teachers);
   const [searchTerm, setSearchTerm] = useState("");
-  const { files } = useSelector((state) => state.files);
+  const {
+    files,
+    newFiles,
+    loading: filesLoading,
+  } = useSelector((state) => state.files);
 
   const [regionTeachers, setRegionTeachers] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+
   useEffect(() => {
     const getProvinces = async () => {
       const { data } = await api.get("/teacher/sorted-regions");
@@ -20,7 +34,24 @@ const RegionTeachers = () => {
       setRegionTeachers(data);
     };
     getProvinces();
+    const fetchApprovedFiles = async () => {
+      try {
+        const allFiles = await getAllFiles();
+        // Filter only approved files
+
+        setAchievements(allFiles);
+      } catch (error) {
+        console.error("Fayllarni yuklashda xatolik:", error);
+      }
+    };
+
+    fetchApprovedFiles();
   }, []);
+
+  useEffect(() => {
+    dispatch(fetchAllTeachers());
+    dispatch(fetchNewFiles());
+  }, [dispatch]);
 
   useEffect(() => {
     localStorage.setItem("region", regionName);
@@ -29,12 +60,125 @@ const RegionTeachers = () => {
     (teacher) => teacher.region == regionName
   )[0]?.teachers;
 
+  const pendingFiles =
+    newFiles?.filter((file) => file.status === "Tekshirilmoqda") || [];
+  const approvedFiles =
+    achievements?.filter((file) => file.status === "Tasdiqlandi") || [];
+  const rejectedFiles =
+    achievements?.filter((file) => file.status === "Tasdiqlanmadi") || [];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">O'qituvchilar ro'yxati</h1>
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-blue-100 text-blue-500">
+              <FiUsers className="h-6 w-6" />
+            </div>
+            <div className="ml-4">
+              <h2 className="text-gray-600">Tinglovchilar</h2>
+              <p className="text-2xl font-semibold">
+                {teachersLoading ? (
+                  <span className="text-sm text-gray-500">Yuklanmoqda...</span>
+                ) : (
+                  teachers.filter(
+                    (c) => c.region.region == localStorage.getItem("region")
+                  )?.length || 0
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link
+              to="/teachers"
+              className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+            >
+              Barchasini ko'rish →
+            </Link>
+          </div>
+        </div>
 
+        <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-yellow-100 text-yellow-500">
+              <FiClock className="h-6 w-6" />
+            </div>
+            <div className="ml-4">
+              <h2 className="text-gray-600">Jarayonda</h2>
+              <p className="text-2xl font-semibold">
+                {filesLoading ? (
+                  <span className="text-sm text-gray-500">Yuklanmoqda...</span>
+                ) : (
+                  pendingFiles.length
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link
+              to="/new-files"
+              className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+            >
+              Barchasini ko'rish →
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100 text-green-500">
+              <FiCheck className="h-6 w-6" />
+            </div>
+            <div className="ml-4">
+              <h2 className="text-gray-600">Tasdiqlanganlar</h2>
+              <p className="text-2xl font-semibold">
+                {filesLoading ? (
+                  <span className="text-sm text-gray-500">Yuklanmoqda...</span>
+                ) : (
+                  approvedFiles.length
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link
+              to="/approved"
+              className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+            >
+              Barchasini ko'rish →
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-red-100 text-red-500">
+              <FiX className="h-6 w-6" />
+            </div>
+            <div className="ml-4">
+              <h2 className="text-gray-600">Rad etilganlar</h2>
+              <p className="text-2xl font-semibold">
+                {filesLoading ? (
+                  <span className="text-sm text-gray-500">Yuklanmoqda...</span>
+                ) : (
+                  rejectedFiles.length
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link
+              to="/rejected"
+              className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+            >
+              Barchasini ko'rish →
+            </Link>
+          </div>
+        </div>
+      </div>
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* <div className="p-4 border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -65,7 +209,7 @@ const RegionTeachers = () => {
           </div>
         </div> */}
 
-        {loading ? (
+        {teachersLoading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
             <p className="mt-2 text-gray-500">O'qituvchilar yuklanmoqda...</p>
@@ -157,12 +301,12 @@ const RegionTeachers = () => {
                       {teacher.region.title}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {teachers.find((c) => c._id == teacher._id).jobs
+                      {teachers.find((c) => c._id == teacher._id)?.jobs
                         ?.length || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {teachers.find((c) => c._id == teacher._id)
-                        .achievementsCount || 0}
+                        ?.achievementsCount || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       {teacher.region.region == "Nukus" ? (

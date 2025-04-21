@@ -375,7 +375,9 @@ const FileDetail = () => {
                           : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
-                      {currentFile.status}
+                      {currentFile.status == "Tekshirilmoqda"
+                        ? "Jarayonda"
+                        : currentFile.status}
                     </span>
                   </p>
                 </div>
