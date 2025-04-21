@@ -14,7 +14,6 @@ const TeacherList = () => {
   useEffect(() => {
     dispatch(fetchAllTeachers());
   }, [dispatch]);
-  console.log(teachers);
 
   const handleDelete = (id) => {
     if (window.confirm("Haqiqatan ham bu o'qituvchini o'chirmoqchimisiz?")) {
@@ -29,10 +28,14 @@ const TeacherList = () => {
     }
   };
 
-  const filteredTeachers = teachers?.filter((teacher) => {
-    const fullName = `${teacher.firstName} ${teacher.lastName}`.toLowerCase();
-    return fullName.includes(searchTerm.toLowerCase());
-  });
+  const region = localStorage.getItem("region");
+
+  const filteredTeachers = teachers
+    ?.filter((c) => c.region.region == region)
+    ?.filter((teacher) => {
+      const fullName = `${teacher.firstName} ${teacher.lastName}`.toLowerCase();
+      return fullName.includes(searchTerm.toLowerCase());
+    });
 
   return (
     <div className="space-y-6">

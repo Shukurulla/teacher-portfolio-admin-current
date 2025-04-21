@@ -21,10 +21,13 @@ const RegionTeachers = () => {
     };
     getProvinces();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("region", regionName);
+  }, [regionName]);
   const filteredTeachers = regionTeachers?.filter(
     (teacher) => teacher.region == regionName
   )[0]?.teachers;
-  console.log(teachers);
 
   return (
     <div className="space-y-6">

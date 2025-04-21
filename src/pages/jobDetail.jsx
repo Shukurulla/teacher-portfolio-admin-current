@@ -145,7 +145,7 @@ const JobDetail = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {file.achievments.section}
+                        {file.achievments.section.slice(0, 80)}...
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
