@@ -33,7 +33,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<RegisterPage />} />
           {/* <Route path="/select" element={<SelectRegions />} /> */}
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/regions" element={<Dashboard />} />
 
           <Route
             path="/"
@@ -50,7 +50,7 @@ function App() {
               element={<JobDetail />}
             />
             <Route path="files/:fileId" element={<FileDetail />} />
-            <Route path="region/:regionName" element={<RegionTeachers />} />
+            <Route path="/" element={<RegionTeachers />} />
             <Route path="/new-files" element={<NewAchievementsPage />} />
             <Route path="/approved" element={<ApprovedFilesPage />} />
             <Route path="/rejected" element={<RejectedFilesPage />} />

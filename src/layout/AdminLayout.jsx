@@ -31,7 +31,7 @@ const AdminLayout = () => {
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto p-4">
-          {pathname !== "/" ? (
+          {pathname !== "/" && pathname !== "/teachers" ? (
             <div className="mb-3">
               <div className="flex items-center">
                 <button

@@ -11,12 +11,14 @@ import { fetchAllTeachers } from "../store/slices/teacherSlice";
 import { fetchNewFiles } from "../store/slices/fileSlice";
 const RegionTeachers = () => {
   const dispatch = useDispatch();
-  const { regionName } = useParams();
+  const regionName = localStorage.getItem("region");
+
   const {
     teachers,
     loading: teachersLoading,
     error,
   } = useSelector((state) => state.teachers);
+
   const [searchTerm, setSearchTerm] = useState("");
   const {
     files,
@@ -53,9 +55,6 @@ const RegionTeachers = () => {
     dispatch(fetchNewFiles());
   }, [dispatch]);
 
-  useEffect(() => {
-    localStorage.setItem("region", regionName);
-  }, [regionName]);
   const filteredTeachers = regionTeachers?.filter(
     (teacher) => teacher.region == regionName
   )[0]?.teachers;
