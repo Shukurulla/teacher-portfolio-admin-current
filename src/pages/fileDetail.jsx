@@ -423,7 +423,8 @@ const FileDetail = () => {
                       onChange={(e) => setResultMessage(e.target.value)}
                     />
                   </div>
-                  {user.region.region == currentFile?.from?.region.region ? (
+                  {localStorage.getItem("region") ==
+                  currentFile?.from?.region.region ? (
                     <div className="flex space-x-3">
                       <button
                         onClick={handleApprove}
