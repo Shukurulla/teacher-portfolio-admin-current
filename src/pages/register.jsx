@@ -76,6 +76,8 @@ const RegisterPage = () => {
     }
   };
 
+  const uniqueRegions = [...new Set(provinces.map((item) => item.region))];
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -123,9 +125,9 @@ const RegisterPage = () => {
                 onChange={(e) => setProvince(JSON.parse(e.target.value))}
                 className="form-control appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               >
-                {provinces.map((item, index) => (
+                {uniqueRegions.map((item, index) => (
                   <option key={index} value={JSON.stringify(item)}>
-                    {item.title}
+                    {item}
                   </option>
                 ))}
               </select>
